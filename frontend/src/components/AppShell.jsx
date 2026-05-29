@@ -1,6 +1,6 @@
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-
+import "./AppShell.css";
 
 function AppShell() {
   const { user, isAuthenticated, logoutUser } = useAuth();
@@ -15,10 +15,10 @@ function AppShell() {
     <div className="app-shell">
       <header className="topbar">
         <Link to="/" className="brand-mark">
-          <span className="brand-badge">CTMS</span>
-          <span>
-            <strong>Cricket Tournament</strong>
-            <small>Management System</small>
+          <span className="brand-badge">TX</span>
+          <span className="brand-text">
+            <strong>Tournament<em>X</em></strong>
+            <small>Sports Management</small>
           </span>
         </Link>
 
@@ -53,6 +53,5 @@ function AppShell() {
     </div>
   );
 }
-
 
 export default AppShell;

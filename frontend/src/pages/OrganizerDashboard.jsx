@@ -7,6 +7,12 @@ import {
   reviewRegistration,
   updateTournament,
 } from "../api/tournamentService";
+import {
+  buildCommentary,
+  buildOrganizerActions,
+  formatCurrency,
+  getTournamentHealth,
+} from "../utils/aiInsights";
 
 
 const initialFormState = {
@@ -43,6 +49,8 @@ function OrganizerDashboard() {
     () => tournaments.find((item) => item.id === selectedTournamentId) || null,
     [tournaments, selectedTournamentId],
   );
+  const aiActions = useMemo(() => buildOrganizerActions(tournaments), [tournaments]);
+  const selectedInsight = selectedTournament ? buildCommentary(selectedTournament, "gemini") : null;
 
   const summary = useMemo(
     () => ({
@@ -178,10 +186,10 @@ function OrganizerDashboard() {
     <div className="page-stack">
       <section className="section-header">
         <div>
-          <span className="eyebrow">Organizer control room</span>
-          <h2>Create, update, and review tournaments</h2>
+          <span className="eyebrow">Organizer command center</span>
+          <h2>Build events, approve teams, and publish smarter updates</h2>
         </div>
-        <p>Manage banners, registration approvals, and tournament capacity from a single dashboard.</p>
+        <p>Manage banners, registration approvals, tournament capacity, and AI-assisted operations from a single dashboard.</p>
       </section>
 
       <section className="dashboard-summary-grid">
@@ -200,6 +208,30 @@ function OrganizerDashboard() {
           <strong>{summary.totalCapacity}</strong>
           <span>Combined team slots across tournaments</span>
         </article>
+      </section>
+
+      <section className="panel ai-ops-panel">
+        <div className="card-header-row">
+          <div>
+            <span className="eyebrow">LLM operations desk</span>
+            <h3>AI suggested next moves</h3>
+            <p>Prompt-engineered recommendations based on capacity, approvals, and event status.</p>
+          </div>
+        </div>
+        <div className="ai-action-grid">
+          {aiActions.map((action) => (
+            <article className="mini-card" key={action}>
+              <strong>{action}</strong>
+              <small>Use this as an organizer prompt or announcement seed.</small>
+            </article>
+          ))}
+        </div>
+        {selectedInsight && (
+          <div className="prompt-preview">
+            <span>Generated prompt for {selectedTournament.name}</span>
+            <pre>{selectedInsight.prompt}</pre>
+          </div>
+        )}
       </section>
 
       {feedback && <section className="panel success-banner">{feedback}</section>}
@@ -298,9 +330,9 @@ function OrganizerDashboard() {
                 <article className="mini-card tournament-mini-card" key={tournament.id}>
                   <div>
                     <strong>{tournament.name}</strong>
-                    <p>{tournament.sport} | {tournament.location}</p>
+                    <p>{tournament.sport} | {tournament.location} | {formatCurrency(tournament.entry_fee)}</p>
                     <small>
-                      {tournament.approved_registrations_count}/{tournament.number_of_teams} approved teams
+                      {tournament.approved_registrations_count}/{tournament.number_of_teams} approved teams | {getTournamentHealth(tournament).label}
                     </small>
                   </div>
                   <div className="inline-actions wrap-actions">

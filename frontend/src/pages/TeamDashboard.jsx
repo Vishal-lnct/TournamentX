@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getMyRegistrations } from "../api/tournamentService";
 import { useAuth } from "../context/AuthContext";
+import { buildTeamPrep } from "../utils/aiInsights";
 
 
 function TeamDashboard() {
@@ -42,10 +43,10 @@ function TeamDashboard() {
     <div className="page-stack">
       <section className="section-header">
         <div>
-          <span className="eyebrow">Team dashboard</span>
+          <span className="eyebrow">Team captain desk</span>
           <h2>{user.team_name || user.full_name}</h2>
         </div>
-        <p>Track where your team stands and head back to the tournament board whenever you want to register for more events.</p>
+        <p>Track registrations, approval status, and AI prep notes before match day.</p>
       </section>
 
       {error && <section className="panel error-banner">{error}</section>}
@@ -66,6 +67,30 @@ function TeamDashboard() {
           <strong>{stats.pending}</strong>
           <span>Entries waiting for review</span>
         </article>
+      </section>
+
+      <section className="panel ai-ops-panel">
+        <div className="card-header-row">
+          <div>
+            <span className="eyebrow">GenAI prep coach</span>
+            <h3>Captain checklist</h3>
+            <p>Short, practical guidance generated from each registration status.</p>
+          </div>
+        </div>
+        <div className="ai-action-grid">
+          {(registrations.length ? registrations : []).slice(0, 3).map((registration) => (
+            <article className="mini-card" key={`prep-${registration.id}`}>
+              <strong>{registration.tournament_name}</strong>
+              <p>{buildTeamPrep(registration)}</p>
+            </article>
+          ))}
+          {!registrations.length && (
+            <article className="mini-card">
+              <strong>No active registrations yet</strong>
+              <p>Browse tournaments and enter your team to unlock prep notes.</p>
+            </article>
+          )}
+        </div>
       </section>
 
       <section className="panel workspace-card">
@@ -93,7 +118,7 @@ function TeamDashboard() {
                 </div>
                 <div className="status-pair status-block">
                   <span className={`status-chip ${registration.status}`}>{registration.status}</span>
-                  <small>{registration.notes || "No extra notes added."}</small>
+                  <small>{buildTeamPrep(registration)}</small>
                 </div>
               </article>
             ))
